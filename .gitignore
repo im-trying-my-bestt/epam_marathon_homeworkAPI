@@ -24,3 +24,4 @@ node_modules/
 *.tfvars.json
 crash.log
 crash.*.log
+.vs/
