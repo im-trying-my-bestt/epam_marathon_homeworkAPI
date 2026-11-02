@@ -555,6 +555,9 @@ Response: `200 OK`
 ```
 
 ### `GET` /reservations/{reservationId}/guest-session-id
+Owner only. Returns the id of the owner's own guest session for the reservation (created on first call if it does not exist yet).
+Errors: `403` caller is not the owner; `404` reservation / group reservation not found.
+
 Response: `200 OK`
 ```json
 {
@@ -1180,30 +1183,63 @@ Response: 200 OK
 ```
 
 ### `POST` /group-reservations/{groupReservationId}/submit
-Response: 200 OK
+Owner only. Takes only `submitted` guest sessions, merges identical dishes by `dishId`, adds them to the order,
+sets the order status to `SubmittedByCustomer` and the group reservation status to `Submitted`.
+
+Request body:
 ```json
 {
-  "message": "Group reservation pre-order submitted successfully."
+  "reservationId": "string"
 }
 ```
-
-### `GET` /guest/groups/{groupReservationId}/sessions
-Response: 200 OK
+Response: `200 OK`
 ```json
 [
-  {
-    "id": "string",
-    "groupReservationId": "string",
-    "guestName": "string",
-    "status": "string"
-  }
+  { "dishId": "string", "quantity": 3 },
+  { "dishId": "string", "quantity": 2 }
 ]
 ```
+Errors: `403` caller is not the owner; `404` reservation / group reservation not found;
+`400` no submitted sessions, no dishes in submitted sessions, order not found, group already submitted/closed,
+or reservation does not match the group.
 
-### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
-Response: 200 OK
+### `GET` /guest/groups/{groupReservationId}/sessions
+Owner only. Lists all participants of the group pre-order with their dishes and totals.
+
+Response: `200 OK`
 ```json
 {
-  "message": "Guest session removed from group successfully."
+  "participants": [
+    {
+      "id": "string",
+      "type": "Guest",
+      "name": "string",
+      "items": [
+        {
+          "dish": { "id": "string", "name": "string", "price": 180 },
+          "quantity": 2
+        }
+      ],
+      "total": 360,
+      "isSubmitted": true
+    }
+  ],
+  "total": 360
 }
 ```
+`type` is `Owner` for the owner's own session and `Guest` for everybody else (the `dish` object contains all dish fields).
+Errors: `403` caller is not the owner; `404` group reservation / reservation not found.
+
+### `DELETE` /guest/groups/{groupReservationId}/sessions/{guestSessionId}
+Owner only. Removes a guest session from the group and returns the updated snapshot (same format as
+`GET /guest/groups/{groupReservationId}/sessions`).
+
+Response: `200 OK`
+```json
+{
+  "participants": [],
+  "total": 0
+}
+```
+Errors: `403` caller is not the owner; `404` group reservation or guest session not found;
+`400` guest session does not belong to this group reservation (or is the owner session).

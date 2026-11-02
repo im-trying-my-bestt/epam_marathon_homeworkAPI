@@ -38,7 +38,7 @@ public class DeleteGuestSessionHandler : IApiRequestHandler
         try
         {
             var updatedSnapshot = await _guestSessionService.DeleteGuestSessionAsync(userId, groupReservationId, guestSessionId);
-            return ResponseBuilder.CreateSuccessResponse(updatedSnapshot);
+            return ResponseBuilder.CreateJsonResponse(200, updatedSnapshot);
         }
         catch (GroupReservationNotFoundException ex)
         {
