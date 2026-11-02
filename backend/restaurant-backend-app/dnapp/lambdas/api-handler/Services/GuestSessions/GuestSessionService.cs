@@ -271,6 +271,7 @@ public class GuestSessionService(
         var order = await orderRepository.GetOrderByReservationIdAsync(reservationId)
             ?? throw new ValidationException($"Order for reservation '{reservationId}' was not found.");
 
+        order.Dishes ??= new List<OrderItem>();
         foreach (var item in consolidated)
         {
             var existing = order.Dishes.FirstOrDefault(d => d.DishId == item.DishId);
@@ -494,6 +495,6 @@ public class GuestSessionService(
         if (reservation?.CustomerId is null) return null;
 
         var user = await userRepository.GetUserByIdAsync(reservation.CustomerId);
-        return user?.Attributes.FirstOrDefault(a => a.Name == "given_name")?.Value;
+        return user?.Attributes?.FirstOrDefault(a => a.Name == "given_name")?.Value;
     }
 }
