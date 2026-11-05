@@ -1,0 +1,6 @@
+{
+  "userId": {"S": "08f1d390-5071-70a5-ac52-34d96d7f14e3"},
+  "locationId": {"S": "2de08053-9bec-4662-bf56-2ccb70aeeb78"},
+  "createdAt": {"S": "2026-11-04T19:40:00Z"},
+  "reservations": {"L": []}
+}
